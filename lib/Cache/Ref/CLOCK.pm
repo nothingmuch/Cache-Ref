@@ -6,8 +6,9 @@ use namespace::autoclean;
 extends qw(Cache::Ref);
 
 with qw(
-    Cache::Ref::Role::Index
     Cache::Ref::Role::API
+    Cache::Ref::Role::Index
+    Cache::Ref::Role::KeyMetadata
 );
 
 has size => (
@@ -38,6 +39,12 @@ has _buffer => (
     },
 );
 
+sub clear {
+    my $self = shift;
+    $self->_index_clear;
+    @$_ = () for @{ $self->_buffer };
+}
+
 # faster version
 sub hit {
     my ( $self, @keys ) = @_;
@@ -54,11 +61,11 @@ sub _hit {
     $e->[0] = $self->k;
 }
 
-sub _remove {
-    my ( $self, $key ) = @_;
-
-    $self->_index_delete($key);
+sub remove {
+    my ( $self, @keys ) = @_;
+    @$_ = () for $self->_index_delete(@keys);
 }
+
 
 sub _get_value {
     my ( $self, $key, $e ) = @_;
@@ -108,8 +115,7 @@ sub _find_free_slot {
 sub _expire {
     my ( $self, $e ) = @_;
 
-    $self->_remove($e->[1]);
-    @$e = ();
+    $self->remove($e->[1]);
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -13,6 +13,11 @@ has _index => (
     is => "ro",
 );
 
+sub _index_clear {
+    my $self = shift;
+    %{ $self->_index } = ();
+}
+
 sub _index_get {
     my ( $self, @keys ) = @_;
     @{ $self->_index }{@keys};
@@ -29,8 +34,8 @@ sub _index_size {
 }
 
 sub _index_delete {
-    my ( $self, $key ) = @_;
-    delete $self->_index->{$key};
+    my ( $self, @keys ) = @_;
+    delete @{ $self->_index }{@keys};
 }
 
 # ex: set sw=4 et:
