@@ -36,15 +36,29 @@ use ok 'Cache::Ref::FIFO';
     is( $c->get("baz"), "blob", "baz still in cache" );
     is( $c->get("zot"), "quxx", "zot still in cache" );
     is( $c->get("quxx"), "dancing", "quxx in cache" );
+
+    $c->remove("quxx");
+
+    is( $c->get("foo"), undef, "foo no longer in cache" );
+    is( $c->get("bar"), undef, "bar no longer in cache" );
+    is( $c->get("baz"), "blob", "baz still in cache" );
+    is( $c->get("zot"), "quxx", "zot still in cache" );
+    is( $c->get("quxx"), undef, "quxx removed from cache" );
+
+    is( $c->_index_size, 2, "two elements in cache" );
+
+    $c->clear;
+
+    is( $c->_index_size, 0, "no elements in cache" );
 }
 
 {
-    my $c = Cache::Ref::FIFO->new( size => 3 );
+    my $c = Cache::Ref::FIFO->new( size => 5 );
 
     my ( $hit, $miss ) = ( 0, 0 );
 
     for ( 1 .. 2000 ) {
-        my $key = 1 + int rand 5;
+        my $key = 1 + int rand 8;
 
         if ( $c->get($key) ) {
             $hit++;
@@ -55,12 +69,8 @@ use ok 'Cache::Ref::FIFO';
     }
 
     cmp_ok( $hit, '>=', $miss, "more cache hits than misses during random access of small sigma ($hit >= $miss)" );
-}
 
-{
-    my $c = Cache::Ref::FIFO->new( size => 3 );
-
-    my ( $hit, $miss ) = ( 0, 0 );
+    ( $hit, $miss ) = ( 0, 0 );
 
     for ( 1 .. 100 ) {
         foreach my $key ( 1 .. 10 ) {
@@ -73,7 +83,7 @@ use ok 'Cache::Ref::FIFO';
         }
     }
 
-    is( $hit, 0, "no hits during linear scans" );
+    cmp_ok( $hit, '<=', $c->size, "no hits during linear scans ($hit)" );
 }
 
 
