@@ -9,7 +9,74 @@ use List::Util qw(shuffle);
 
 use ok 'Cache::Ref::CAR';
 
-local $SIG{__WARN__} = sub {};
+my $inv;
+
+sub invariants {
+    my $self = shift;
+
+    $inv++;
+
+    # bugs
+    fail("mru size undeflow") if $self->_mru_size < 0;
+    fail("mfu size underflow") if $self->_mfu_size < 0;
+    fail("mfu history size underflow") if $self->_mfu_history_size < 0;
+    fail("mfu history count and list disagree") if $self->_mfu_history_size xor $self->_mfu_history_head;
+    fail("mru history size underflow") if $self->_mru_history_size < 0;
+    fail("mru history count and list disagree") if $self->_mru_history_size xor $self->_mru_history_head;
+
+    # I1    0 ≤ |T1| + |T2| ≤ c.
+    fail("mru + mfu size > cache size") if $self->_mfu_size + $self->_mru_size > $self->size;
+
+    if ( $self->isa("Cache::Ref::CART") ) {
+        # I2’    0 ≤ |T2|+|B2| ≤ c.
+        fail("mfu + mfu history size > cache size ") if $self->_mfu_size + $self->_mfu_history_size > $self->size;
+
+        # I3’    0 ≤ |T1|+|B1| ≤ 2c.
+        fail("mru + mru history size > cache size * 2 ") if $self->_mru_size + $self->_mru_history_size > $self->size * 2;
+    } else {
+        # I2    0 ≤ |T1| + |B1| ≤ c.
+        fail("mru + mru history size > cache size ") if $self->_mru_size + $self->_mru_history_size > $self->size;
+
+        # I3    0 ≤ |T2| + |B2| ≤ 2c.
+        fail("mfu + mfu history size > cache size * 2 ") if $self->_mfu_size + $self->_mfu_history_size > $self->size * 2;
+    }
+
+    # I4    0 ≤ |T1| + |T2| + |B1| + |B2| ≤ 2c.
+    fail("sum of all sizes > cache size * 2 ")
+        if $self->_mfu_size + $self->_mfu_history_size + $self->_mru_size + $self->_mru_history_size > $self->size * 2;
+    fail("index size > cache size * 2") if $self->_index_size > $self->size * 2;
+
+    # FIXME these invariants are broken on remove/clear
+
+    # I5    If |T1|+|T2|<c, then B1 ∪B2 is empty.
+    fail("history lists have data even though clocks aren't full")
+        if $self->_mru_size + $self->_mfu_size < $self->size and $self->_mru_history_size || $self->_mfu_history_size;
+
+    # I6    If |T1|+|B1|+|T2|+|B2| ≥ c, then |T1| + |T2| = c.
+    fail("clocks aren't full index size is bigger than cache size")
+        if $self->_mru_size + $self->_mfu_size != $self->size
+        and $self->_mfu_size + $self->_mfu_history_size + $self->_mru_size + $self->_mru_history_size >= $self->size;
+    fail("clocks aren't full index size is bigger than cache size")
+        if $self->_mru_size + $self->_mfu_size != $self->size and $self->_index_size >= $self->size;
+
+    # I7    Due to demand paging, once the cache is full, it remains full from then on.
+}
+
+{
+    package Cache::Ref::CAR;
+
+    __PACKAGE__->meta->make_mutable;
+
+    foreach my $method (
+        grep { /^[a-z]/ && !/^(?:size|meta)$/ }
+        __PACKAGE__->meta->get_method_list
+    ) {
+        __PACKAGE__->meta->add_before_method_modifier($method, sub { ::invariants($_[0]) });
+        __PACKAGE__->meta->add_after_method_modifier($method, sub { ::invariants($_[0]) });
+    }
+
+    __PACKAGE__->meta->make_immutable;
+}
 
 {
     my $c = Cache::Ref::CAR->new( size => 3 );
@@ -172,6 +239,8 @@ local $SIG{__WARN__} = sub {};
         cmp_ok( $hit, '>=', $miss/10, "hit rate during medium linear scan ($hit >= $miss/10)" );
     }
 }
+
+cmp_ok( $inv, '>=', 1000, "invariants ran at least a few times" );
 
 done_testing;
 
