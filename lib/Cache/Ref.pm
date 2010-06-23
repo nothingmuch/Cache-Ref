@@ -15,8 +15,157 @@ __END__
 
 Cache::Ref - Memory only cache of live references
 
+=head1 SYNOPSIS
+
+    # this class is just a base class and a documentation start point
+    # use the various algorithms
+
+    use Cache::Ref::CART;
+    my $cache = Cache::Ref::CART->new( size => 1024 );
+
+    # add a cache value or set an existing key to a new value
+    $cache->set(foo => $some_object);
+
+    # get a value
+    $cache->get("foo"); # also takes a list of keys
+
+    # 'hit' is like 'get' without the overhead of obtaining the value
+    # it's useful for keeping values from expiring, but when you already have
+    # the values
+    $cache->hit("foo"); # also takes a list of keys
+
+    # remove a key before it has normally expired
+    $cache->remove("foo");
+
+    # remove all cached data
+    $cache->clear;
+
 =head1 DESCRIPTION
 
 Unlike L<CHI> which attempts to address the problem of caching things
 persistently, this module implements in memory caching, designed primarily for
-shared references.
+B<shared> references.
+
+This collection of classes implements a number of semi related algorithms.
+
+=head1 ALGORITHMS
+
+=head2 FIFO
+
+This is a simple FIFO queue where a C<set> places the element on the head of a
+queue, and if the size is too big an element will be discarded from the tail of
+the queue.
+
+L<Cache::Bounded> provides similar behavior, but flushing happens periodically
+and in bigger numbers. Therefore, performance will be better on very high cache
+usage, when hits don't matter that much.
+
+This implementation has the lowest memory overhead, due to the simplicity of
+its data structures (just a hash and an array).
+
+Its expiry policy is appropriate for when the data set has a high locality of
+reference, and random access is generally confined to neighbors, as a part of
+some larger scan.
+
+For truly random access cache hit rates will suffer.
+
+Long term utility of cache entries is not considered at all, so scans will
+poison the cache.
+
+This is the only algorithm for which C<get> (and C<hit>) has no side effects.
+
+=head2 LRU
+
+This implementation uses an LRU list of entries (two implementations are
+provided for trading off memory for speed).
+
+Long term utility of cache entries is not considered at all, so scans will
+poison the cache.
+
+
+=head2 CLOCK
+
+This is an implementation of second chance FIFO, using a circular buffer.
+
+Second chance FIFO is a very simple approximation of LRU. The CLOCK algorithm
+has its origins in Multics' virtual memory paging implementation.
+
+It's slightly more general purpose than FIFO when dealing with random access.
+
+Long term utility of cache entries is not considered at all, so scans will
+poison the cache.
+
+Using values of C<k> bigger than 1 (the default), more accurate approximations
+of LRU can be made, at the cost of more complicated expiry.
+
+=head2 GCLOCK
+
+Tries to approximate LFU instead of LRU.
+
+Cache hits increment a counter by one, instead of resetting it to the constant C<k>.
+
+Cache replacement decays existing counters just like CLOCK.
+
+=head3 Cache::Ref::Util::LRU::List
+
+Uses a doubly linked list to perform MRU propagation.
+
+Faster than Array.
+
+Cache hits and LRU removal is O(1).
+
+=head3 Cache::Ref::Util::LRU::Array
+
+Generally slower for a cache size bigger than about 10 elements, but uses less memory due to the compact layout.
+
+Cache hits are O(cache size). LRU removal is O(1).
+
+=head2 CAR
+
+CLOCK with Adaptive Removal.
+
+A self tuning cache that varies between LRU and LFU expiry.
+
+Has the highest memory overhead of all the implementations due to the extent of
+the metadata it maintains.
+
+However, this overhead is still small for when sizeable objects are involved.
+
+Resistent to cache poisoning when scanning.
+
+=head2 CART
+
+CAR with temporal filtering.
+
+Like CAR but does not promote a cache entry to the long term usefulness set due
+to frequent successive access.
+
+This is probably the most general purpose algorithm.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<CHI>
+
+Appropriate for persistent caching of data with complex expiry.
+
+=item L<Cache::Cascade>
+
+Can be used to layer L<Cache::Ref> over other caches (e.g. L<CHI>).
+
+=item L<Cache::Bounded>
+
+A simpler implementation with similar goals (memory only caching), designed for
+when cache misses are not very high cost, so cache hits have an extremely low
+overhead and the policy is very simplistic.
+
+=item Algorithm information
+
+L<http://en.wikipedia.org/wiki/Cache_algorithms>
+
+L<http://en.wikipedia.org/wiki/Page_replacement_algorithm>
+
+L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf>
+
+=back
