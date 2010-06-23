@@ -64,9 +64,7 @@ sub _free_slot {
     my $f = $self->_fifo;
 
     while ( $self->_index_size >= $self->size ) {
-        if ( defined( my $key = shift @$f ) ) {
-            $self->_index_delete($key)
-        }
+        $self->_index_delete(shift @$f);
     }
 }
 

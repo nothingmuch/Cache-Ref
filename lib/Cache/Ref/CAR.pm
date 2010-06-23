@@ -224,9 +224,7 @@ sub set {
                 # it was evacuated from the MFU history list
                 # decrease the size of the recency pool
                 if ( $self->_mru_target_size > 0 ) {
-                    my $adjustment = $self->_mfu_history_size
-                        ? int( $self->_mru_history_size / $self->_mfu_history_size)
-                        : 1;
+                    my $adjustment = int( $self->_mru_history_size / $self->_mfu_history_size );
                     $self->_mru_target_size( max( 0, $self->_mru_target_size - max(1, $adjustment) ) );
                 }
 
@@ -235,12 +233,8 @@ sub set {
             } else {
                 # it was evacuated from the MRU history list
                 # increase the size of the recency pool
-                if ( $self->_mru_target_size < $self->size ) {
-                    my $adjustment = $self->_mru_history_size
-                        ? int( $self->_mfu_history_size / $self->_mru_history_size)
-                        : 1;
-                    $self->_mru_target_size( min( $self->size, $self->_mru_target_size + max(1, $adjustment) ) );
-                }
+                my $adjustment = int( $self->_mfu_history_size / $self->_mru_history_size );
+                $self->_mru_target_size( min( $self->size, $self->_mru_target_size + max(1, $adjustment) ) );
 
                 $self->_mru_history_splice($e);
                 $self->_dec_mru_history_size;
@@ -309,7 +303,8 @@ sub _expire {
         }
     }
 
-    if ( my $tail = $self->_mfu ) {
+    {
+        my $tail = $self->_mfu;
         my $cur = $self->_next($tail);
         
         loop: {
@@ -334,7 +329,6 @@ sub _expire {
                 # move to history
                 $cur->[0] = 3; # set reference bit, meaning that it's in mfu history
                 if ( $self->_mfu_history_head ) {
-                    die if $self->_prev($self->_mfu_history_head);
                     $self->_set_prev($self->_mfu_history_head, $cur);
                     $self->_set_next($cur, $self->_mfu_history_head);
                 } else {
@@ -346,8 +340,6 @@ sub _expire {
                 $self->_inc_mfu_history_size;
             }
         }
-    } else {
-        die $self->dump;
     }
 }
 

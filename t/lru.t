@@ -44,6 +44,7 @@ foreach my $lru ( map { "Cache::Ref::Util::LRU::$_" } qw(Array List) ) {
         is( $c->get("zot"), "quxx", "zot still in cache" );
         is( $c->get("oi"), "vey", "oi in cache" );
 
+        $c->set( foo => "brrr" );
         $c->set( foo => "bar" );
         $c->set( bar => "baz" );
 
@@ -52,6 +53,8 @@ foreach my $lru ( map { "Cache::Ref::Util::LRU::$_" } qw(Array List) ) {
         is( $c->get("baz"), undef, "baz no longer in cache" );
         is( $c->get("zot"), undef, "zot no longer in cache" );
         is( $c->get("oi"), "vey", "oi still in cache" );
+
+        is_deeply( [ $c->get(qw(foo bar nothere)) ], [ qw(bar baz), undef ], "mget" );
 
         $c->remove("oi");
 
@@ -95,7 +98,7 @@ foreach my $lru ( map { "Cache::Ref::Util::LRU::$_" } qw(Array List) ) {
             }
         }
 
-        cmp_ok( $hit, '<=', $c->size, "no hits during linear scans ($hit)" );
+        cmp_ok( $hit, '<=', $c->size * 3, "no significant hits during linear scans ($hit)" );
     }
 
 }

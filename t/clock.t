@@ -30,6 +30,7 @@ foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
 
         is( $c->get("foo"), undef, "foo no longer in cache" );
 
+        $c->set( quxx => "tmp" );
         $c->set( quxx => "dancing" );
 
         is( $c->get("bar"), "lala", "bar still in cache" );
@@ -71,6 +72,8 @@ foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
         is( $c->get("new"), "element", "new still in cache" );
         is( $c->get("another"), "member", "another still in cache" );
 
+        is_deeply( [ $c->get(qw(bar new nothere)) ], [ qw(lala element), undef ], "mget" );
+
         $c->clear;
 
         is( $c->_index_size, 0, "no elements in cache" );
@@ -107,7 +110,7 @@ foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
             }
         }
 
-        cmp_ok( $hit, '<=', $c->size, "no hits during linear scans ($hit)" );
+        cmp_ok( $hit, '<=', $c->size * 3, "no significant hits during linear scans ($hit)" );
     }
 }
 

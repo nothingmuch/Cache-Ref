@@ -29,7 +29,6 @@ local $SIG{__WARN__} = sub {};
     is( $c->get("bar"), "lala", "bar still in cache" );
     is( $c->get("baz"), "blob", "baz in cache" );
 
-
     $c->set( zot => "quxx" );
     is( $c->get("foo"), undef, "foo no longer in cache" );
     is( $c->get("bar"), "lala", "bar still in cache" );
@@ -53,6 +52,8 @@ local $SIG{__WARN__} = sub {};
     is( $c->get("baz"), "blob", "baz no longer in cache" );
     is( $c->get("zot"), undef, "zot no longer in cache" );
     is( $c->get("oi"), undef, "oi still in cache" );
+
+    is_deeply( [ $c->get(qw(foo bar nothere)) ], [ qw(bar baz), undef ], "mget" );
 }
 
 {
@@ -92,8 +93,6 @@ local $SIG{__WARN__} = sub {};
                     $miss++;
                     $c->set($key => $key);
                 }
-
-                fail("index too big") if $c->_index_size > $c->size * 2;
             }
         }
 
@@ -113,8 +112,6 @@ local $SIG{__WARN__} = sub {};
                     $miss++;
                     $c->set($key => $key);
                 }
-
-                fail("index too big") if $c->_index_size > $c->size * 2;
             }
         }
 
@@ -133,8 +130,6 @@ local $SIG{__WARN__} = sub {};
                     $miss++;
                     $c->set($key => $key);
                 }
-
-                fail("index too big") if $c->_index_size > $c->size * 2;
             }
         }
 
@@ -153,8 +148,6 @@ local $SIG{__WARN__} = sub {};
                     $miss++;
                     $c->set($key => $key);
                 }
-
-                fail("index too big") if $c->_index_size > $c->size * 2;
             }
         }
 
@@ -173,8 +166,6 @@ local $SIG{__WARN__} = sub {};
                     $miss++;
                     $c->set($key => $key);
                 }
-
-                fail("index too big") if $c->_index_size > $c->size * 2;
             }
         }
 

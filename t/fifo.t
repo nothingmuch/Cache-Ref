@@ -30,10 +30,11 @@ use ok 'Cache::Ref::FIFO';
     is( $c->get("baz"), "blob", "baz still in cache" );
     is( $c->get("zot"), "quxx", "zot in cache" );
 
+    $c->set( baz => "jsd" );
     $c->set( quxx => "dancing" );
     is( $c->get("foo"), undef, "foo no longer in cache" );
     is( $c->get("bar"), undef, "bar no longer in cache" );
-    is( $c->get("baz"), "blob", "baz still in cache" );
+    is( $c->get("baz"), "jsd", "baz still in cache" );
     is( $c->get("zot"), "quxx", "zot still in cache" );
     is( $c->get("quxx"), "dancing", "quxx in cache" );
 
@@ -41,11 +42,17 @@ use ok 'Cache::Ref::FIFO';
 
     is( $c->get("foo"), undef, "foo no longer in cache" );
     is( $c->get("bar"), undef, "bar no longer in cache" );
-    is( $c->get("baz"), "blob", "baz still in cache" );
+    is( $c->get("baz"), "jsd", "baz still in cache" );
     is( $c->get("zot"), "quxx", "zot still in cache" );
     is( $c->get("quxx"), undef, "quxx removed from cache" );
 
+    is_deeply( [ $c->get(qw(baz zot nothere)) ], [ qw(jsd quxx), undef ], "mget" );
+
     is( $c->_index_size, 2, "two elements in cache" );
+
+    $c->remove("bar");
+    $c->set( $_ => $_ ) for 1 .. 3;
+    is( $c->get($_), $_, "get $_" ) for 1 .. 3;
 
     $c->clear;
 
@@ -83,7 +90,7 @@ use ok 'Cache::Ref::FIFO';
         }
     }
 
-    cmp_ok( $hit, '<=', $c->size, "no hits during linear scans ($hit)" );
+    cmp_ok( $hit, '<=', $c->size * 3, "no significant hits during linear scans ($hit)" );
 }
 
 
