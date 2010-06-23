@@ -6,62 +6,84 @@ use warnings;
 use Test::More;
 
 use ok 'Cache::Ref::CLOCK';
+use ok 'Cache::Ref::GCLOCK';
 
-{
-    my $c = Cache::Ref::CLOCK->new( size => 3 );
+foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
+    {
+        my $c = $impl->new( size => 3 );
 
-    isa_ok( $c, "Cache::Ref" );
+        isa_ok( $c, "Cache::Ref" );
 
-    $c->set( foo => "blah" );
-    is( $c->get("foo"), "blah", "foo" );
+        $c->set( foo => "blah" );
+        is( $c->get("foo"), "blah", "foo" );
 
-    $c->set( bar => "lala" );
-    is( $c->get("bar"), "lala", "bar" );
+        $c->set( bar => "lala" );
+        is( $c->get("bar"), "lala", "bar" );
 
-    $c->set( baz => "blob" );
-    is( $c->get("baz"), "blob", "baz" );
+        $c->set( baz => "blob" );
+        is( $c->get("baz"), "blob", "baz" );
 
-    $c->set( zot => "quxx" );
-    is( $c->get("zot"), "quxx", "zot" );
+        $c->set( zot => "quxx" );
+        is( $c->get("zot"), "quxx", "zot" );
 
-    is( $c->get("bar"), "lala", "bar still in cache" );
+        is( $c->get("bar"), "lala", "bar still in cache" );
 
-    is( $c->get("foo"), undef, "foo no longer in cache" );
+        is( $c->get("foo"), undef, "foo no longer in cache" );
 
-    $c->set( quxx => "dancing" );
+        $c->set( quxx => "dancing" );
 
-    is( $c->get("bar"), "lala", "bar still in cache" );
-    is( $c->get("baz"), undef, "baz no longer in cache" );
-    is( $c->get("zot"), "quxx", "zot still in cache" );
-    is( $c->get("quxx"), "dancing", "quxx still in cache" );
-}
+        is( $c->get("bar"), "lala", "bar still in cache" );
+        is( $c->get("baz"), undef, "baz no longer in cache" );
+        is( $c->get("zot"), "quxx", "zot still in cache" );
+        is( $c->get("quxx"), "dancing", "quxx in cache" );
 
-{
-    my $c = Cache::Ref::CLOCK->new( size => 3 );
+        $c->remove("quxx");
 
-    my ( $hit, $miss ) = ( 0, 0 );
+        is( $c->get("bar"), "lala", "bar still in cache" );
+        is( $c->get("baz"), undef, "baz no longer in cache" );
+        is( $c->get("zot"), "quxx", "zot still in cache" );
+        is( $c->get("quxx"), undef, "quxx removed from cache" );
 
-    for ( 1 .. 2000 ) {
-        my $key = 1 + int rand 5;
+        is( $c->_index_size, 2, "two elements in cache" );
 
-        if ( $c->get($key) ) {
-            $hit++;
+        $c->set( quxx => "blah" );
+
+        is( $c->get("bar"), "lala", "bar still in cache" );
+        is( $c->get("baz"), undef, "baz no longer in cache" );
+        is( $c->get("zot"), "quxx", "zot still in cache" );
+        is( $c->get("quxx"), "blah", "quxx in cache" );
+
+        if ( $c->isa("Cache::Ref::CLOCK") ) {
+            $c->set( new => "element" ); # overwrites 'zot' due to current value of _hand
+            $c->hit("bar");
+            $c->set( another => "member" );
         } else {
-            $miss++;
-            $c->set($key => $key);
+            $c->hit("bar") for 1 .. 3;
+            $c->set("new" => "element"); # expires 'quxx'
+            $c->hit("new"); # otherwise it's less frequently used than 'zot'
+            $c->set("another" => "member");
         }
+
+        is( $c->get("bar"), "lala", "bar still in cache" );
+        is( $c->get("baz"), undef, "baz no longer in cache" );
+        is( $c->get("zot"), undef,, "zot no longer in cache" );
+        is( $c->get("quxx"), undef, "quxx no longer in cache" );
+        is( $c->get("new"), "element", "new still in cache" );
+        is( $c->get("another"), "member", "another still in cache" );
+
+        $c->clear;
+
+        is( $c->_index_size, 0, "no elements in cache" );
     }
 
-    cmp_ok( $hit, '>=', $miss, "more cache hits than misses during random access of small sigma ($hit >= $miss)" );
-}
+    {
+        my $c = $impl->new( size => 5 );
 
-{
-    my $c = Cache::Ref::CLOCK->new( size => 3 );
+        my ( $hit, $miss ) = ( 0, 0 );
 
-    my ( $hit, $miss ) = ( 0, 0 );
+        for ( 1 .. 2000 ) {
+            my $key = 1 + int rand 8;
 
-    for ( 1 .. 100 ) {
-        foreach my $key ( 1 .. 10 ) {
             if ( $c->get($key) ) {
                 $hit++;
             } else {
@@ -69,11 +91,25 @@ use ok 'Cache::Ref::CLOCK';
                 $c->set($key => $key);
             }
         }
+
+        cmp_ok( $hit, '>=', $miss, "more cache hits than misses during random access of small sigma ($hit >= $miss)" );
+
+        ( $hit, $miss ) = ( 0, 0 );
+
+        for ( 1 .. 100 ) {
+            foreach my $key ( 1 .. 10 ) {
+                if ( $c->get($key) ) {
+                    $hit++;
+                } else {
+                    $miss++;
+                    $c->set($key => $key);
+                }
+            }
+        }
+
+        cmp_ok( $hit, '<=', $c->size, "no hits during linear scans ($hit)" );
     }
-
-    is( $hit, 0, "no hits during linear scans" );
 }
-
 
 done_testing;
 
