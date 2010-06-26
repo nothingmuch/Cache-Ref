@@ -171,7 +171,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
             my ( $hit, $miss ) = ( 0, 0 );
 
             foreach my $offset ( 1 .. 100 ) {
-                for ( 1 .. 100 ) {
+                for ( 1 .. 30 ) {
                     # medium locality of reference,
                     my $key = $offset + int rand 8;
 
@@ -191,7 +191,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
             my ( $hit, $miss ) = ( 0, 0 );
 
             foreach my $offset ( 1 .. 100 ) {
-                for ( 1 .. 100 ) {
+                for ( 1 .. 30 ) {
                     my $key = $offset + int rand 40;
 
                     if ( $c->get($key) ) {
@@ -209,7 +209,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 1000 ) {
+            for ( 1 .. 100 ) {
                 # biased locality of reference, like a linear scan, but with weighting
                 foreach my $key ( 1 .. 3, 1 .. 3, 1 .. 12 ) {
                     if ( $c->get($key) ) {
@@ -227,7 +227,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 1000 ) {
+            for ( 1 .. 100 ) {
                 # biased locality of reference, like a linear scan, but with weighting
                 foreach my $key ( 1 .. 3, 1 .. 20 ) {
                     if ( $c->get($key) ) {
@@ -250,7 +250,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 500 ) {
+            for ( 1 .. 100 ) {
                 # biased locality of reference, like a linear scan, but with weighting
                 foreach my $key ( 1 .. 3, 1 .. 45 ) {
                     if ( $c->get($key) ) {
@@ -273,7 +273,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 1000 ) {
+            for ( 1 .. 100 ) {
                 # should favour LFU
                 foreach my $key ( shuffle( 1 .. 2, 1 .. 3, 1 .. 10 ) ) {
                     if ( $c->get($key) ) {
@@ -291,7 +291,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 500 ) {
+            for ( 1 .. 100 ) {
                 # good for LFU with a larger history size
                 foreach my $key ( shuffle(1 .. 3), shuffle(1 .. 45) ) {
                     if ( $c->get($key) ) {
@@ -309,7 +309,7 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         {
             my ( $hit, $miss ) = ( 0, 0 );
 
-            for ( 1 .. 500 ) {
+            for ( 1 .. 200 ) {
                 # good for LFU with a large history size
                 foreach my $key ( shuffle( 1 .. 2, 1 .. 3, 1 .. 45 ) ) {
                     if ( $c->get($key) ) {
