@@ -26,7 +26,7 @@ with qw(Cache::Ref::Util::LRU::API);
 # since there's no need for metadata, insert is just like hit
 sub insert {
     my ( $self, @elements ) = @_;
-    
+
     $self->hit(@elements);
 
     return ( @elements == 1 ? $elements[0] : @elements );
@@ -66,9 +66,7 @@ sub remove {
 
 __PACKAGE__->meta->make_immutable;
 
+__PACKAGE__;
+
 # ex: set sw=4 et:
-
-__PACKAGE__
-
-__END__
 

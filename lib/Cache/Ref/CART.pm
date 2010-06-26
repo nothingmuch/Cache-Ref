@@ -89,7 +89,7 @@ sub _increase_mru_history_target_size {
     my $self = shift;
 
     $self->_set_mru_history_target_size( min($self->_mru_history_target_size + 1, 2 * $self->size - $self->_mru_size ) );
-}   
+}
 
 sub _decrease_mru_history_target_size {
     my $self = shift;
@@ -100,12 +100,7 @@ sub _decrease_mru_history_target_size {
 sub _restore_from_mfu_history {
     my ( $self, $e ) = @_;
 
-    # FIXME brain is off
-    if ( $self->_mfu_size  + $self->_mru_size + $self->_mfu_history_size -
-        ( $self->_mfu_size + $self->_mru_size - $self->_long_term_utility_size )
-        >=
-        $self->size
-    ) {
+    if ( $self->_mfu_history_size + $self->_long_term_utility_size >= $self->size ) {
         $self->_increase_mru_history_target_size();
     }
 
@@ -140,12 +135,7 @@ sub _expire {
             $self->_mru_push($cur);
             $cur = $self->_next($cur);
 
-            # FIXME brain is off
-            if ( $self->_mfu_size  + $self->_mru_size + $self->_mfu_history_size -
-                ( $self->_mfu_size + $self->_mru_size - $self->_long_term_utility_size )
-                    >=
-                $self->size
-            ) {
+            if ( $self->_mfu_history_size + $self->_long_term_utility_size >= $self->size ) {
                 $self->_increase_mru_history_target_size;
             }
         }
@@ -227,9 +217,7 @@ sub _clear_additional {
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =pod
 

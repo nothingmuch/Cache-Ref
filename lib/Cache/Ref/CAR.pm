@@ -136,9 +136,7 @@ sub _clear_additional { }
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =pod
 
@@ -155,7 +153,7 @@ Cache::Ref::CAR - CLOCK with Adaptive Replacement
 =head1 DESCRIPTION
 
 This algorithm is an implementation of
-L<L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf|CAR: Clock with Adaptive Replacement, Sorav Bansal and Dharmendra S. Modha>.
+L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf|CAR: Clock with Adaptive Replacement, Sorav Bansal and Dharmendra S. Modha>.
 
 See also L<Cache::Ref::CART> which is probably more appropriate for random access work loads.
 

@@ -3,9 +3,7 @@ use Moose;
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =pod
 
@@ -170,16 +168,6 @@ L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf>
 =head1 VERSION CONTROL
 
 L<http://github.com/nothingmuch/Cache-Ref>
-
-=head1 AUTHOR
-
-Yuval Kogman
-
-=head1 COPYRIGHT & LICENSE
-
-    Copyright (c) 2010 Yuval Kogman. All rights reserved
-    This program is free software; you can redistribute
-    it and/or modify it under the same terms as Perl itself.
 
 =cut
 

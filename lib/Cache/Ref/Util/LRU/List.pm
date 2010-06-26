@@ -56,9 +56,7 @@ sub DEMOLISH { shift->clear }
 
 __PACKAGE__->meta->make_immutable;
 
+__PACKAGE__;
+
 # ex: set sw=4 et:
-
-__PACKAGE__
-
-__END__
 

@@ -88,9 +88,7 @@ sub remove {
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =head1 NAME
 
@@ -117,7 +115,7 @@ L<Cache::Ref> for a discussion.
 
 The size of the live entries.
 
-=head lru_class
+=item lru_class
 
 The class of the LRU list implementation.
 

@@ -16,9 +16,7 @@ requires qw(
     remove_lru
 );
 
+__PACKAGE__;
+
 # ex: set sw=4 et:
-
-__PACKAGE__
-
-__END__
 

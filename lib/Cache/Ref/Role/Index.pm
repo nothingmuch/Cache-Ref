@@ -40,7 +40,5 @@ sub _index_delete {
 
 # ex: set sw=4 et:
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 

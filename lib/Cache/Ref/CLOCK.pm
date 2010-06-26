@@ -22,9 +22,7 @@ sub _hit {
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =pod
 
@@ -57,7 +55,7 @@ a bit to 1)).
 
 The size of the live entries.
 
-=head1 k
+=item k
 
 This is the initial value given to all hit entries.
 

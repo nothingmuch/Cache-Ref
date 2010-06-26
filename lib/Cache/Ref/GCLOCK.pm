@@ -15,9 +15,7 @@ sub _hit {
 
 __PACKAGE__->meta->make_immutable;
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
 =head1 NAME
 

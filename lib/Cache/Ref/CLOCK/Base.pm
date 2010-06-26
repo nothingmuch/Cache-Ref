@@ -34,7 +34,7 @@ has _buffer => (
 
 sub hit {
     my ( $self, @keys ) = @_;
-    
+
     $self->_hit( [ grep { defined } $self->_index_get(@keys) ] );
 
     return;
@@ -77,7 +77,7 @@ sub set {
 
 sub _find_free_slot {
     my $self = shift;
-    
+
     my $i = $self->_hand;
     my $b = $self->_buffer;
 
@@ -102,7 +102,5 @@ sub _find_free_slot {
 
 # ex: set sw=4 et:
 
-__PACKAGE__
-
-__END__
+__PACKAGE__;
 
