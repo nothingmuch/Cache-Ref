@@ -4,7 +4,7 @@ use Moose::Role;
 use namespace::autoclean;
 
 sub REF_BIT ()         { 0x01 }
-sub MFU_HISTORY_BIT () { 0x02 }
+sub MFU_BIT ()         { 0x02 }
 sub LONG_TERM_BIT ()   { 0x04 }
 
 requires qw(
@@ -171,41 +171,67 @@ sub get {
 }
 
 sub _circular_splice {
-    my ( $self, $list, $node ) = @_;
+    my ( $self, $node ) = @_;
 
-    my $tail = $self->$list or confess;
+    my $list = $node->[0] & MFU_BIT ? "_mfu" : "_mru";
+
     my $next = $self->_next($node);
 
-    # splice out of mru
     if ( $next == $node ) {
+        # this is the last element in the list
         $self->$list(undef);
     } else {
-        $self->_set_next( $tail, $next );
+        my $prev = $self->_prev($node);
+        $self->_set_next( $prev, $next );
+        $self->_set_prev( $next, $prev );
+
+        if ( $self->$list == $node ) {
+            $self->$list($prev); # only happens on remove()
+        }
     }
 
     $self->_set_next($node, undef);
+    $self->_set_prev($node, undef);
 
     $self->${\"_dec${list}_size"};
 }
 
+sub _mfu_push {
+    my ( $self, $node ) = @_;
+    $node->[0] |= MFU_BIT;
+    $self->_circular_push($node);
+}
+
+sub _mru_push {
+    my ( $self, $node ) = @_;
+    $node->[0] &= ~MFU_BIT;
+    $self->_circular_push($node);
+}
+
 sub _circular_push {
-    my ( $self, $list, $new_tail ) = @_;
+    my ( $self, $node ) = @_;
+
+    my $list = $node->[0] & MFU_BIT ? "_mfu" : "_mru";
 
     if ( my $tail = $self->$list ) {
         my $head = $self->_next($tail);
 
-        # splice $e in
-        $self->_set_next($tail, $new_tail);
-        $self->_set_next($new_tail, $head);
+        $self->_set_next($tail, $node);
+        $self->_set_prev($node, $tail);
+
+        $self->_set_next($node, $head);
+        $self->_set_prev($head, $node);
     } else {
-        $self->_set_next($new_tail, $new_tail);
+        $self->_set_next($node, $node);
+        $self->_set_prev($node, $node);
     }
 
     $self->${\"_inc${list}_size"};
 
     # $hand++
-    $self->$list($new_tail);
+    $self->$list($node);
 }
+
 
 sub _hit {
     my ( $self, $e ) = @_;
@@ -257,8 +283,8 @@ sub set {
         # cache directory hit
 
         # restore from the appropriate history list
-        if ( $e->[0] & MFU_HISTORY_BIT ) {
-            $e->[0] &= ~MFU_HISTORY_BIT;
+        if ( $e->[0] & MFU_BIT ) {
+            $e->[0] &= ~MFU_BIT;
 
             $self->_decrease_mru_target_size();
 
@@ -290,7 +316,7 @@ sub _insert_new_entry {
     my $e = [ 0, $key, $value ]; # 0 means no special bits are set
 
     # simply insert to the MRU pool
-    $self->_circular_push( _mru => $e );
+    $self->_mru_push($e);
     $self->_index_set( $key => $e );
 }
 
@@ -327,7 +353,25 @@ sub _circular_clear {
 
 sub DEMOLISH { shift->clear }
 
-sub remove { die "FIXME" }
+sub remove {
+    my ( $self, @keys ) = @_;
+
+    foreach my $e ( grep { defined } $self->_index_delete(@keys) ) {
+        if ( exists $e->[2] ) {
+            $self->_circular_splice($e);
+        } else {
+            if ( $e->[0] & MFU_BIT ) {
+                $self->_mfu_history_pop;
+                $self->_dec_mfu_history_size;
+            } else {
+                $self->_mru_history_pop;
+                $self->_dec_mru_history_size;
+            }
+        }
+    }
+
+    return;
+}
 
 # ex: set sw=4 et:
 

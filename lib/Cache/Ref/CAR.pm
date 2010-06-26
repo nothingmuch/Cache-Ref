@@ -43,13 +43,13 @@ sub _increase_mru_target_size {
 sub _restore_from_mfu_history {
     my ( $self, $e ) = @_;
 
-    $self->_circular_push( _mfu => $e );
+    $self->_mfu_push($e);
 }
 
 sub _restore_from_mru_history {
     my ( $self, $e ) = @_;
 
-    $self->_circular_push( _mfu => $e );
+    $self->_mfu_push($e);
 }
 
 sub _expire {
@@ -62,13 +62,13 @@ sub _expire {
         while ( $cur and $self->_mru_size >= max(1,$self->_mru_target_size) ) {
             my $next = $self->_next($cur);
 
-            $self->_circular_splice( _mru => $cur );
+            $self->_circular_splice($cur);
 
             if ( $cur->[0] & Cache::Ref::CAR::Base::REF_BIT ) {
                 $cur->[0] &= ~Cache::Ref::CAR::Base::REF_BIT; # turn off reference bit
 
                 # move to t2 (mfu)
-                $self->_circular_push( _mfu => $cur );
+                $self->_mfu_push($cur);
 
                 $cur = $next;
             } else {
@@ -77,7 +77,7 @@ sub _expire {
                 delete $cur->[2]; # delete the value
 
                 # move to history
-                # MFU_HISTORY_BIT not set
+                # MFU_BIT not set
 
                 if ( $self->_mru_history_head ) {
                     $self->_set_next($cur, $self->_mru_history_head);
@@ -101,7 +101,7 @@ sub _expire {
         my $cur = $self->_next($tail);
 
         loop: {
-            if ( $cur->[0] ) {
+            if ( $cur->[0] & Cache::Ref::CAR::Base::REF_BIT ) {
                 $cur->[0] &= ~Cache::Ref::CAR::Base::REF_BIT;
                 $tail = $cur;
                 $cur = $self->_next($cur);
@@ -110,12 +110,12 @@ sub _expire {
                 # reference bit is off, which means this entry is freeable
 
                 $self->_mfu($tail);
-                $self->_circular_splice( _mfu => $cur );
+                $self->_circular_splice($cur);
 
                 delete $cur->[2]; # delete the value
 
                 # move to history
-                $cur->[0] |= Cache::Ref::CAR::Base::MFU_HISTORY_BIT;
+                $cur->[0] |= Cache::Ref::CAR::Base::MFU_BIT;
 
                 if ( $self->_mfu_history_head ) {
                     $self->_set_prev($self->_mfu_history_head, $cur);

@@ -112,7 +112,7 @@ sub _restore_from_mfu_history {
     die unless $e->[0] & Cache::Ref::CAR::Base::LONG_TERM_BIT();
     $self->_inc_long_term_utility_size();
 
-    $self->_circular_push( _mru => $e );
+    $self->_mru_push($e);
 }
 
 sub _restore_from_mru_history {
@@ -121,7 +121,7 @@ sub _restore_from_mru_history {
     $e->[0] |= Cache::Ref::CAR::Base::LONG_TERM_BIT();
     $self->_inc_long_term_utility_size();
 
-    $self->_circular_push( _mru => $e );
+    $self->_mru_push($e);
 }
 
 sub _expire {
@@ -132,12 +132,12 @@ sub _expire {
 
         # mru pool is too big
         while ( $cur and $cur->[0] & Cache::Ref::CAR::Base::REF_BIT ) {
-            $self->_circular_splice( _mfu => $cur );
+            $self->_circular_splice($cur);
 
             $cur->[0] &= ~Cache::Ref::CAR::Base::REF_BIT; # turn off reference bit
 
             # move to t1 (mru)
-            $self->_circular_push( _mru => $cur );
+            $self->_mru_push($cur);
             $cur = $self->_next($cur);
 
             # FIXME brain is off
@@ -172,8 +172,8 @@ sub _expire {
                 $cur = $self->_next($cur);
             } elsif ( $cur->[0] & Cache::Ref::CAR::Base::LONG_TERM_BIT ) {
                 my $next = $self->_next($cur);
-                $self->_circular_splice( _mru => $cur );
-                $self->_circular_push( _mfu => $cur );
+                $self->_circular_splice($cur);
+                $self->_mfu_push($cur);
                 $cur = $self->_next($self->_mru);;
 
                 $self->_decrease_mru_history_target_size();
@@ -186,7 +186,7 @@ sub _expire {
 
     if ( $self->_mru_size >= max(1, $self->_mru_target_size) ) {
         my $head = $self->_next($self->_mru);
-        $self->_circular_splice( _mru => $head );
+        $self->_circular_splice($head);
 
         if ( $self->_mru_history_head ) {
             $self->_set_next($head, $self->_mru_history_head);
@@ -200,7 +200,7 @@ sub _expire {
         delete $head->[2]; # delete the value
     } else {
         my $head = $self->_next($self->_mfu);
-        $self->_circular_splice( _mfu => $head );
+        $self->_circular_splice($head);
 
         $self->_dec_long_term_utility_size; # entries in mfu *always* have long term set
 
@@ -214,7 +214,7 @@ sub _expire {
         $self->_inc_mfu_history_size;
 
         delete $head->[2]; # delete the value
-        $head->[0] |= Cache::Ref::CAR::Base::MFU_HISTORY_BIT;
+        $head->[0] |= Cache::Ref::CAR::Base::MFU_BIT;
     }
 }
 
