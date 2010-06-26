@@ -3,8 +3,6 @@ use Moose;
 
 __PACKAGE__->meta->make_immutable;
 
-# ex: set sw=4 et:
-
 __PACKAGE__
 
 __END__
@@ -82,6 +80,19 @@ provided for trading off memory for speed).
 Long term utility of cache entries is not considered at all, so scans will
 poison the cache.
 
+=head3 Cache::Ref::Util::LRU::List
+
+Uses a doubly linked list to perform MRU propagation.
+
+Faster than Array.
+
+Cache hits and LRU removal is O(1).
+
+=head3 Cache::Ref::Util::LRU::Array
+
+Generally slower for a cache size bigger than about 10 elements, but uses less memory due to the compact layout.
+
+Cache hits are O(cache size). LRU removal is O(1).
 
 =head2 CLOCK
 
@@ -105,20 +116,6 @@ Tries to approximate LFU instead of LRU.
 Cache hits increment a counter by one, instead of resetting it to the constant C<k>.
 
 Cache replacement decays existing counters just like CLOCK.
-
-=head3 Cache::Ref::Util::LRU::List
-
-Uses a doubly linked list to perform MRU propagation.
-
-Faster than Array.
-
-Cache hits and LRU removal is O(1).
-
-=head3 Cache::Ref::Util::LRU::Array
-
-Generally slower for a cache size bigger than about 10 elements, but uses less memory due to the compact layout.
-
-Cache hits are O(cache size). LRU removal is O(1).
 
 =head2 CAR
 
@@ -169,3 +166,21 @@ L<http://en.wikipedia.org/wiki/Page_replacement_algorithm>
 L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf>
 
 =back
+
+=head1 VERSION CONTROL
+
+L<http://github.com/nothingmuch/Cache-Ref>
+
+=head1 AUTHOR
+
+Yuval Kogman
+
+=head1 COPYRIGHT & LICENSE
+
+    Copyright (c) 2010 Yuval Kogman. All rights reserved
+    This program is free software; you can redistribute
+    it and/or modify it under the same terms as Perl itself.
+
+=cut
+
+# ex: set sw=4 et:

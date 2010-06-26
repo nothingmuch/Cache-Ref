@@ -385,9 +385,9 @@ sub remove {
     return;
 }
 
-# ex: set sw=4 et:
-
 __PACKAGE__
 
 __END__
+
+# ex: set sw=4 et:
 

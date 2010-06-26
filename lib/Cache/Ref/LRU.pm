@@ -88,9 +88,41 @@ sub remove {
 
 __PACKAGE__->meta->make_immutable;
 
-# ex: set sw=4 et:
-
 __PACKAGE__
 
 __END__
 
+=head1 NAME
+
+Cache::Ref::LRU - Least recently used expiry policy
+
+=head1 SYNOPSIS
+
+    my $c = Cache::Ref::LRU->new(
+        size => $n,
+    );
+
+=head1 DESCRIPTION
+
+This is an implementation of the least recently used expiry policy.
+
+It provides both an array and a doubly linked list based implementation. See
+L<Cache::Ref> for a discussion.
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item size
+
+The size of the live entries.
+
+=head lru_class
+
+The class of the LRU list implementation.
+
+=back
+
+=cut
+
+# ex: set sw=4 et:

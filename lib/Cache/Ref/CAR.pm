@@ -136,11 +136,47 @@ sub _clear_additional { }
 
 __PACKAGE__->meta->make_immutable;
 
-# ex: set sw=4 et:
-
 __PACKAGE__
 
 __END__
 
-CAR: Clock with Adaptive Replacement, Sorav Bansal and Dharmendra S. Modha: L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf>
+=pod
+
+=head1 NAME
+
+Cache::Ref::CAR - CLOCK with Adaptive Replacement
+
+=head1 SYNOPSIS
+
+    my $c = Cache::Ref::CAR->new(
+        size => $n,
+    );
+
+=head1 DESCRIPTION
+
+This algorithm is an implementation of
+L<L<http://www.almaden.ibm.com/cs/people/dmodha/clockfast.pdf|CAR: Clock with Adaptive Replacement, Sorav Bansal and Dharmendra S. Modha>.
+
+See also L<Cache::Ref::CART> which is probably more appropriate for random access work loads.
+
+CAR balances between an MFU like policy and an MRU like policy, automatically
+tuning itself as the workload varies.
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item size
+
+The size of the live entries.
+
+Note that the cache also remembers this many expired keys, and keeps some
+metadata about those keys, so for memory usage the overhead is probably around
+double what L<Cache::Ref::LRU> requires.
+
+=back
+
+=cut
+
+# ex: set sw=4 et:
 

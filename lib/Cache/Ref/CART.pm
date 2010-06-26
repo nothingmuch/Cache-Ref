@@ -227,9 +227,48 @@ sub _clear_additional {
 
 __PACKAGE__->meta->make_immutable;
 
-# ex: set sw=4 et:
-
 __PACKAGE__
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Cache::Ref::CART - CAR with temporal filtering
+
+=head1 SYNOPSIS
+
+    my $c = Cache::Ref::CART->new(
+        size => $n,
+    );
+
+=head1 DESCRIPTION
+
+This algorithm is an extension to L<Cache::Ref::CAR> that has temporal
+filtering on the upgrading from MRU to MFU pool.
+
+This means that two subsequent accesses to the same key do not automatically
+make it viable for long term caching, to get upgraded to MFU status a key must
+be expired but known in the history.
+
+This is probably the most general purpose caching algorithm.
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item size
+
+The size of the live entries.
+
+Note that the cache also remembers this many expired keys, and keeps some
+metadata about those keys, so for memory usage the overhead is probably around
+double what L<Cache::Ref::LRU> requires.
+
+=back
+
+=cut
+
+# ex: set sw=4 et:
 
