@@ -1,6 +1,18 @@
 package Cache::Ref::CAR::Base;
 use Moose::Role;
 
+# TODO
+# this needs lot of cleanup but I ran out of motivation. it works, though.
+#
+# the circular buffers should finish being implemented using the doubly linked
+# list role
+#
+# CART needs a bunch of simplifications in the code
+#
+# the various linked list APIs should probably be consolidated to respect the
+# MFU bit, with _move_to_history, _restore_from_history etc checking that
+# instead of having two methods per each
+
 use namespace::autoclean;
 
 sub REF_BIT ()         { 0x01 }
