@@ -27,7 +27,18 @@ foreach my $lru ( map { "Cache::Ref::Util::LRU::$_" } qw(Array List) ) {
         is( $c->get("bar"), "lala", "bar still in cache" );
         is( $c->get("baz"), "blob", "baz in cache" );
 
-        $c->set( zot => "quxx" );
+        {
+            my $ran = 0;
+            $c->compute( baz => sub { $ran++ } );
+            ok( !$ran, "did not compute" );
+        }
+
+        {
+            my $ran = 0;
+            $c->compute( zot => sub { $ran++; "quxx" } );
+            ok( $ran, "did compute" );
+        }
+
         is( $c->get("foo"), undef, "foo no longer in cache" );
         is( $c->get("bar"), "lala", "bar still in cache" );
         is( $c->get("baz"), "blob", "baz still in cache" );
