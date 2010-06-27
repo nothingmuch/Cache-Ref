@@ -14,33 +14,38 @@ Cache::Ref - Memory only cache of live references
 =head1 SYNOPSIS
 
     # this class is just a base class and a documentation start point
-    # use the various algorithms
+    # just use the various algorithms directly
 
     use Cache::Ref::CART;
     my $cache = Cache::Ref::CART->new( size => 1024 );
 
+
     # add a cache value or set an existing key to a new value
     $cache->set(foo => $some_object);
+
 
     # get a value
     $cache->get("foo"); # also takes a list of keys
 
-    # 'hit' is like 'get' without the overhead of obtaining the value
-    # it's useful for keeping values from expiring, but when you already have
-    # the values
-    $cache->hit("foo"); # also takes a list of keys
 
     # remove a key before it has normally expired
     $cache->remove("foo");
 
+
     # remove all cached data
     $cache->clear;
+
+
+    # 'hit' is like 'get' without the overhead of obtaining the value
+    # it's useful for keeping values from expiring when you already have
+    # the values
+    $cache->hit("foo"); # also takes a list of keys
 
 =head1 DESCRIPTION
 
 Unlike L<CHI> which attempts to address the problem of caching things
 persistently, this module implements in memory caching, designed primarily for
-B<shared> references.
+B<shared references> in memory.
 
 This collection of classes implements a number of semi related algorithms.
 
@@ -119,7 +124,7 @@ Cache replacement decays existing counters just like CLOCK.
 
 CLOCK with Adaptive Removal.
 
-A self tuning cache that varies between LRU and LFU expiry.
+A self tuning cache that varies between approximations of LRU and LFU expiry.
 
 Has the highest memory overhead of all the implementations due to the extent of
 the metadata it maintains.
@@ -154,6 +159,15 @@ Can be used to layer L<Cache::Ref> over other caches (e.g. L<CHI>).
 A simpler implementation with similar goals (memory only caching), designed for
 when cache misses are not very high cost, so cache hits have an extremely low
 overhead and the policy is very simplistic.
+
+=item L<Cache::Weak>
+
+Caches shared references for as long as there is some other reference to those
+objects.
+
+=item L<Cache::Profile>
+
+Designed to help choose an appropriate cache layer.
 
 =item Algorithm information
 
