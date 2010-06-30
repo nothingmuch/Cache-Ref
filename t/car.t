@@ -136,11 +136,15 @@ foreach my $class qw(Cache::Ref::CAR Cache::Ref::CART) {
         is( $c->peek("zot"), undef, "zot no longer in cache" );
         is( $c->peek("oi"), undef, "oi still in cache" );
 
-        is_deeply( [ $c->peek(qw(foo bar nothere)) ], [ qw(bar baz), undef ], "mget" );
+        is_deeply( [ $c->peek(qw(foo bar baz nothere)) ], [ qw(bar baz blob), undef ], "mget" );
 
         $c->remove("foo");
 
         is( $c->peek("foo"), undef, "foo removed" );
+
+        $c->expire(2);
+
+        is_deeply( [ $c->peek(qw(foo bar baz nothere)) ], [ undef, undef, undef, undef ], "mget" );
     }
 
     {

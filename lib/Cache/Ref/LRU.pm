@@ -50,6 +50,15 @@ sub hit {
     return;
 }
 
+sub expire {
+    my ( $self, $how_many ) = @_;
+
+    my $l = $self->_lru;
+    $self->_index_delete( $l->remove_lru ) for 1 .. ($how_many || 1);
+
+    return;
+}
+
 sub set {
     my ( $self, $key, $value ) = @_;
 
@@ -60,7 +69,7 @@ sub set {
         $e->[0] = $value;
     } else {
         if ( $self->_index_size == $self->size ) {
-            $self->_index_delete( $l->remove_lru );
+            $self->expire(1);
         }
 
         $self->_index_set( $key => [ $value, $l->insert($key) ] );

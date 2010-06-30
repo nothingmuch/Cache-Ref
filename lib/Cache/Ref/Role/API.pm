@@ -11,6 +11,7 @@ requires qw(
     remove
     clear
     hit
+    expire
 );
 
 sub compute {

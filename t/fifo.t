@@ -54,6 +54,12 @@ use ok 'Cache::Ref::FIFO';
     $c->set( $_ => $_ ) for 1 .. 3;
     is( $c->get($_), $_, "get $_" ) for 1 .. 3;
 
+    is( $c->_index_size, 3, "refilled" );
+
+    $c->expire(2);
+
+    is( $c->_index_size, 1, "expired" );
+
     $c->clear;
 
     is( $c->_index_size, 0, "no elements in cache" );

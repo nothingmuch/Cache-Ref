@@ -51,21 +51,21 @@ sub set {
     my ( $self, $key, $value ) = @_;
 
     unless ( defined $self->_index_get($key) ) {
-        $self->_free_slot;
+        if ( $self->_index_size >= $self->size ) {
+            $self->expire( 1 + $self->_index_size - $self->size );
+        }
         push @{ $self->_fifo }, $key;
     }
 
     $self->_index_set($key, $value);
 }
 
-sub _free_slot {
-    my $self = shift;
+sub expire {
+    my ( $self, $how_many ) = @_;
 
-    my $f = $self->_fifo;
+    $self->_index_delete( splice @{ $self->_fifo }, 0, $how_many || 1 );
 
-    while ( $self->_index_size >= $self->size ) {
-        $self->_index_delete(shift @$f);
-    }
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;

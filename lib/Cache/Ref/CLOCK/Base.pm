@@ -75,6 +75,30 @@ sub set {
     }
 }
 
+sub expire {
+    my ( $self, $how_many ) = @_;
+
+    my $i = $self->_hand;
+    my $b = $self->_buffer;
+
+    while ( $how_many ) {
+        if ( $$i == $#$b ) {
+            $$i = -1;
+        }
+
+        if ( my $e = $b->[++$$i] ) {
+            if ( !$e->[0] ) {
+                $self->remove($e->[1]); # also clears @$e
+                $how_many--;
+            } else {
+                $e->[0]--;
+            }
+        }
+    }
+
+    return;
+}
+
 sub _find_free_slot {
     my $self = shift;
 

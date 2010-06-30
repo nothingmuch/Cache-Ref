@@ -30,8 +30,6 @@ requires qw(
 
     _decrease_mru_target_size
     _increase_mru_target_size
-
-    _expire
 );
 
 with (
@@ -272,7 +270,7 @@ sub set {
 
     # the live cache entries are full, we need to expire something
     if ( $self->_mru_size + $self->_mfu_size == $self->size ) {
-        $self->_expire();
+        $self->expire(1);
 
         # if the entry wasn't in history we may need to free up something from
         # there too, to make room for whatever just expired

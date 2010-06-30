@@ -74,6 +74,12 @@ foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
 
         is_deeply( [ $c->get(qw(bar new nothere)) ], [ qw(lala element), undef ], "mget" );
 
+        is( $c->_index_size, 3, "cache size" );
+
+        $c->expire(2);
+        
+        is( $c->_index_size, 1, "expired" );
+
         $c->clear;
 
         is( $c->_index_size, 0, "no elements in cache" );

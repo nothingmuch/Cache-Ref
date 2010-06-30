@@ -73,6 +73,10 @@ foreach my $lru ( map { "Cache::Ref::Util::LRU::$_" } qw(Array List) ) {
 
         is( $c->_index_size, 2, "two elements in cache" );
 
+        $c->expire(1);
+
+        is( $c->_index_size, 1, "expired one entry" );
+
         $c->clear;
 
         is( $c->_index_size, 0, "cache is empty" );

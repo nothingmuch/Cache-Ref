@@ -119,8 +119,10 @@ sub _restore_from_mru_history {
     $self->_mru_push($e);
 }
 
-sub _expire {
-    my $self = shift;
+sub expire {
+    my ( $self, $how_many ) = @_;
+
+    $how_many ||= 1;
 
     if ( my $mfu = $self->_mfu ) {
         my $cur = $self->_next($mfu);
@@ -174,38 +176,43 @@ sub _expire {
         }
     }
 
-    if ( $self->_mru_size >= max(1, $self->_mru_target_size) ) {
-        my $head = $self->_next($self->_mru);
-        $self->_circular_splice($head);
+    for ( 1 .. $how_many ) {
+        if ( $self->_mru_size >= max(1, $self->_mru_target_size) ) {
+            my $head = $self->_next($self->_mru);
+            $self->_circular_splice($head);
 
-        if ( $self->_mru_history_head ) {
-            $self->_set_next($head, $self->_mru_history_head);
-            $self->_set_prev($self->_mru_history_head, $head);
+            if ( $self->_mru_history_head ) {
+                $self->_set_next($head, $self->_mru_history_head);
+                $self->_set_prev($self->_mru_history_head, $head);
+            }
+
+            $self->_mru_history_head($head);
+            $self->_mru_history_tail($head) unless $self->_mru_history_tail;
+            $self->_inc_mru_history_size;
+
+            delete $head->[2]; # delete the value
+        } else {
+            my $tail = $self->_mfu || last;
+            my $head = $self->_next($tail) || last;
+            $self->_circular_splice($head);
+
+            $self->_dec_long_term_utility_size; # entries in mfu *always* have long term set
+
+            if ( $self->_mfu_history_head ) {
+                $self->_set_next($head, $self->_mfu_history_head);
+                $self->_set_prev($self->_mfu_history_head, $head);
+            }
+
+            $self->_mfu_history_head($head);
+            $self->_mfu_history_tail($head) unless $self->_mfu_history_tail;
+            $self->_inc_mfu_history_size;
+
+            delete $head->[2]; # delete the value
+            $head->[0] |= Cache::Ref::CAR::Base::MFU_BIT;
         }
-
-        $self->_mru_history_head($head);
-        $self->_mru_history_tail($head) unless $self->_mru_history_tail;
-        $self->_inc_mru_history_size;
-
-        delete $head->[2]; # delete the value
-    } else {
-        my $head = $self->_next($self->_mfu);
-        $self->_circular_splice($head);
-
-        $self->_dec_long_term_utility_size; # entries in mfu *always* have long term set
-
-        if ( $self->_mfu_history_head ) {
-            $self->_set_next($head, $self->_mfu_history_head);
-            $self->_set_prev($self->_mfu_history_head, $head);
-        }
-
-        $self->_mfu_history_head($head);
-        $self->_mfu_history_tail($head) unless $self->_mfu_history_tail;
-        $self->_inc_mfu_history_size;
-
-        delete $head->[2]; # delete the value
-        $head->[0] |= Cache::Ref::CAR::Base::MFU_BIT;
     }
+
+    return;
 }
 
 sub _clear_additional {
