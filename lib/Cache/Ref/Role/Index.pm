@@ -18,6 +18,11 @@ sub _index_clear {
     %{ $self->_index } = ();
 }
 
+sub _index_keys {
+    my $self = shift;
+    keys %{ $self->_index };
+}
+
 sub _index_get {
     my ( $self, @keys ) = @_;
     @{ $self->_index }{@keys};
