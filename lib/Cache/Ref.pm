@@ -49,6 +49,46 @@ B<shared references> in memory.
 
 This collection of classes implements a number of semi related algorithms.
 
+=head1 METHODS
+
+=over 4
+
+=item get @keys
+
+Fetch entries from the cache.
+
+=item hit @keys
+
+Promote C<@keys> in the cache.
+
+Same effect as C<get> except it doesn't actually return anything.
+
+=item set $key => $value
+
+Adds an entry to the cache.
+
+=item compute $key, sub { ...; return $value }
+
+Calls C<get> with C<$key>. If there's a hit the value is
+returned. Otherwise the code block is executed to compute the value, and the result is stored in the cache using C<set>.
+
+=item remove @keys
+
+Remove specific entries from the cache.
+
+=item expire $x
+
+Remove C<$x> many entries from the cache. Hopefully the entries
+removed are the most useless ones.
+
+C<$x> defaults to 1.
+
+=item clear
+
+Empty the cache.
+
+=back
+
 =head1 ALGORITHMS
 
 =head2 FIFO

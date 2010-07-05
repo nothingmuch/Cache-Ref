@@ -385,5 +385,42 @@ sub remove {
 
 __PACKAGE__;
 
+=pod
+
+=head1 NAME
+
+Cache::Ref::CAR::Base - base clase for CAR and CART
+
+=head1 SYNOPSIS
+
+    # see CAR or CART
+
+=head1 DESCRIPTION
+
+This role provides the common functionality for L<Cache::Ref::CAR> and L<Cache::Ref::CART>.
+
+=head1 METHODS
+
+=over 4
+
+=item get @keys
+
+Fetch data from the cache
+
+=item set $key, $value
+
+Insert data to the cache
+
+=item remove @keys
+
+Remove entries from the cache. Not in the original CAR algorithm description.
+
+=item expire $x
+
+Removes C<$x> elements from the cache (hopefully the most useless
+ones). The default value for C<$x> is 1.
+
+=back
+
 # ex: set sw=4 et:
 
