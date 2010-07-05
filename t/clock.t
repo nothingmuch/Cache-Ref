@@ -77,7 +77,7 @@ foreach my $impl qw(Cache::Ref::CLOCK Cache::Ref::GCLOCK) {
         is( $c->_index_size, 3, "cache size" );
 
         $c->expire(2);
-        
+
         is( $c->_index_size, 1, "expired" );
 
         $c->clear;
