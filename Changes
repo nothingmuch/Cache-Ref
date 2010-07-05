@@ -1,0 +1,7 @@
+0.02
+	- Added LIFO, Null and Random implementations
+	- Added 'expire' method
+	- Documentation improvements
+
+0.01
+	- Initial version
