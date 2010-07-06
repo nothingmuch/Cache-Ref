@@ -1,4 +1,6 @@
 package Cache::Ref::LRU;
+# ABSTRACT: Least recently used expiry policy
+
 use Moose;
 
 use Cache::Ref::Util::LRU::List;
@@ -98,10 +100,6 @@ sub remove {
 __PACKAGE__->meta->make_immutable;
 
 __PACKAGE__;
-
-=head1 NAME
-
-Cache::Ref::LRU - Least recently used expiry policy
 
 =head1 SYNOPSIS
 

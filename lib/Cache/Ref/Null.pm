@@ -1,4 +1,6 @@
 package Cache::Ref::Null;
+# ABSTRACT: Caches nothing
+
 use Moose;
 
 use namespace::autoclean;
@@ -22,10 +24,6 @@ __PACKAGE__;
 __END__
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::Null - Caches nothing
 
 =head1 SYNOPSIS
 

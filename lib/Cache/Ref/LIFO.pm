@@ -1,4 +1,6 @@
 package Cache::Ref::LIFO;
+# ABSTRACT: Saves entries until full, discarding subsequent sets.
+
 use Moose;
 
 use namespace::autoclean;
@@ -86,10 +88,6 @@ __PACKAGE__;
 __END__
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::LIFO - Saves entries until full, discarding subsequent sets.
 
 =head1 SYNOPSIS
 

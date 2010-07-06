@@ -1,4 +1,6 @@
 package Cache::Ref;
+# ABSTRACT: Memory only cache of live references
+
 use Moose;
 
 __PACKAGE__->meta->make_immutable;
@@ -6,10 +8,6 @@ __PACKAGE__->meta->make_immutable;
 __PACKAGE__;
 
 =pod
-
-=head1 NAME
-
-Cache::Ref - Memory only cache of live references
 
 =head1 SYNOPSIS
 

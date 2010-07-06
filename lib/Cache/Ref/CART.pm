@@ -1,4 +1,6 @@
 package Cache::Ref::CART;
+# ABSTRACT: CAR with temporal filtering
+
 use Moose;
 
 use List::Util qw(max min);
@@ -227,10 +229,6 @@ __PACKAGE__->meta->make_immutable;
 __PACKAGE__;
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::CART - CAR with temporal filtering
 
 =head1 SYNOPSIS
 

@@ -1,4 +1,6 @@
 package Cache::Ref::CAR::Base;
+# ABSTRACT: base clase for CAR and CART
+
 use Moose::Role;
 
 # TODO
@@ -386,10 +388,6 @@ sub remove {
 __PACKAGE__;
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::CAR::Base - base clase for CAR and CART
 
 =head1 SYNOPSIS
 

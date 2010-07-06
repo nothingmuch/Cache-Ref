@@ -1,4 +1,6 @@
 package Cache::Ref::CAR;
+# ABSTRACT: CLOCK with Adaptive Replacement
+
 use Moose;
 
 use List::Util qw(max min);
@@ -143,10 +145,6 @@ __PACKAGE__->meta->make_immutable;
 __PACKAGE__;
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::CAR - CLOCK with Adaptive Replacement
 
 =head1 SYNOPSIS
 

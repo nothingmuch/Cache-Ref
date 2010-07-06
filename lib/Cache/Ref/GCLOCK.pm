@@ -1,4 +1,6 @@
 package Cache::Ref::GCLOCK;
+# ABSTRACT: GCLOCK cache replacement algorithm
+
 use Moose;
 
 use namespace::autoclean;
@@ -16,10 +18,6 @@ sub _hit {
 __PACKAGE__->meta->make_immutable;
 
 __PACKAGE__;
-
-=head1 NAME
-
-Cache::Ref::GCLOCK - GCLOCK cache replacement algorithm
 
 =head1 SYNOPSIS
 

@@ -1,4 +1,6 @@
 package Cache::Ref::CLOCK;
+# ABSTRACT: CLOCK cache replacement algorithm
+
 use Moose;
 
 use namespace::autoclean;
@@ -25,10 +27,6 @@ __PACKAGE__->meta->make_immutable;
 __PACKAGE__;
 
 =pod
-
-=head1 NAME
-
-Cache::Ref::CLOCK - CLOCK cache replacement algorithm
 
 =head1 SYNOPSIS
 
